@@ -1,7 +1,7 @@
 package com.hanshul.blog.payloads;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-
 @Getter
 @Setter
 @NoArgsConstructor

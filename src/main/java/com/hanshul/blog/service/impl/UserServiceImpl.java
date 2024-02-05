@@ -55,25 +55,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updateUser(UserDto userDto, Integer userId) {
+    public ResponseEntity<BlogAppResponse> updateUser(UserDto userDto, Integer userId) {
         LOGGER.debug("Inside updateUser() method of UserServiceImpl");
+        Instant startTime = Instant.now();
         UserEntity userEntity = this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
         userEntity.setName(userDto.getName());
         userEntity.setEmail(userDto.getEmail());
         userEntity.setPassword(userDto.getPassword());
         userEntity.setAbout(userDto.getAbout());
-        return this.modelMapper.map(this.userRepository.save(userEntity), UserDto.class);
+        BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
+                .meta(ResponseMeta.builder().request(userDto).build())
+                .data(this.modelMapper.map(this.userRepository.save(userEntity), UserDto.class))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @Override
-    public UserDto getUserById(Integer userId) {
+    public ResponseEntity<BlogAppResponse> getUserById(Integer userId) {
         LOGGER.debug("Inside getUserById() method of UserServiceImpl");
+        Instant startTime = Instant.now();
         UserEntity userEntity = this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
-        return UserDto.builder().name(userEntity.getName()).email(userEntity.getEmail()).id(userEntity.getId()).about(userEntity.getAbout()).build();
+        BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
+                .data(UserDto.builder().name(userEntity.getName()).email(userEntity.getEmail()).id(userEntity.getId()).about(userEntity.getAbout()).build())
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build())
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @Override
-    public List<UserDto> getAllUsers() {
+    public ResponseEntity<BlogAppResponse> getAllUsers() {
+        Instant startTime = Instant.now();
         List<UserEntity> userEntity = this.userRepository.findAll();
         List<UserDto> response = new ArrayList<>();
         for (UserEntity user : userEntity) {
@@ -82,7 +93,10 @@ public class UserServiceImpl implements UserService {
         }
 //        Below code can be used to map everything we got from DB to DTO but the only drawback here is that it will also map users passwords and will expose them in response
 //        List<UserDto> response = userEntity.stream().map(userEntity1 -> modelMapper.map(userEntity1,UserDto.class)).toList();
-        return response;
+        return ResponseEntity.ok(BlogAppResponse.builder().success(true).starTime(startTime)
+                .data(response)
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build())
+                .build());
     }
 
     @Override
@@ -90,6 +104,4 @@ public class UserServiceImpl implements UserService {
         this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
         this.userRepository.deleteById(userId);
     }
-
-
 }
