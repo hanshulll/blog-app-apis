@@ -87,10 +87,18 @@ public class UserServiceImpl implements UserService {
         Instant startTime = Instant.now();
         List<UserEntity> userEntity = this.userRepository.findAll();
         List<UserDto> response = new ArrayList<>();
-        for (UserEntity user : userEntity) {
-            UserDto userDto = UserDto.builder().name(user.getName()).email(user.getEmail()).about(user.getAbout()).id(user.getId()).build();
+        userEntity.forEach(user->{
+            UserDto userDto = new UserDto();
+            userDto.setName(user.getName());
+            userDto.setEmail(user.getEmail());
+            userDto.setAbout(user.getAbout());
+            userDto.setId(user.getId());
             response.add(userDto);
-        }
+        });
+//        for (UserEntity user : userEntity) {
+//            UserDto userDto = UserDto.builder().name(user.getName()).email(user.getEmail()).about(user.getAbout()).id(user.getId()).build();
+
+//        }
 //        Below code can be used to map everything we got from DB to DTO but the only drawback here is that it will also map users passwords and will expose them in response
 //        List<UserDto> response = userEntity.stream().map(userEntity1 -> modelMapper.map(userEntity1,UserDto.class)).toList();
         return ResponseEntity.ok(BlogAppResponse.builder().success(true).starTime(startTime)

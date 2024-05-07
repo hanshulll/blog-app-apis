@@ -16,7 +16,7 @@ public class BlogAppResponse<T, M> {
 
     private boolean success;
 
-    private String id;
+//    private String id;
 
     private ResponseMeta<M> meta;
 
@@ -32,7 +32,7 @@ public class BlogAppResponse<T, M> {
             responseMeta.setStatus(meta.getStatus());
             responseMeta.setTook(Duration.between(starTime,Instant.now()).toMillis());
             responseMeta.setRequest(meta.getRequest());
-            responseMeta.setEvent(meta.getEvent());
+//            responseMeta.setEvent(meta.getEvent());
             this.meta = meta;
             return this;
         }
