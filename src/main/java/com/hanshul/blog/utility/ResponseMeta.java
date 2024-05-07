@@ -14,5 +14,5 @@ public class ResponseMeta <T>{
     private int status;
     @JsonInclude(value = JsonInclude.Include.ALWAYS)
     private T request;
-    private String event;
+//    private String event;
 }

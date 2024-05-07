@@ -1,16 +1,17 @@
 package com.hanshul.blog.payloads;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.Getter;
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@lombok.Setter
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
+@lombok.Builder
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDto {
     private int id;
     private String name;
     private String email;
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String password;
     private String about;
 }
