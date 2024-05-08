@@ -4,6 +4,7 @@ import com.hanshul.blog.payloads.UserDto;
 import com.hanshul.blog.service.UserService;
 import com.hanshul.blog.utility.BlogAppResponse;
 import com.hanshul.blog.utility.ResponseMeta;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<BlogAppResponse> createUser(@RequestBody UserDto userDto){
+    public ResponseEntity<BlogAppResponse> createUser(@Valid @RequestBody UserDto userDto){
         return this.userService.createUser(userDto);
     }
 
@@ -34,7 +35,7 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable("userId") Integer userId){
         this.userService.deleteUser(userId);
         return ResponseEntity.ok(BlogAppResponse.builder().success(true).starTime(Instant.now()).
-                data(Map.of("success","true","message","User deleted successfully"))
+                data(Map.of("message","User deleted successfully"))
                 .meta(ResponseMeta.builder().status(HttpStatus.OK.value())
                         .build()).build());
     }
