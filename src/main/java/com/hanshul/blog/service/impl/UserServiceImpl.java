@@ -11,7 +11,6 @@ import com.hanshul.blog.utility.ResponseMeta;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,6 +26,7 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     public static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+
 
     /////////////////////////////////////////////////
     /////// CONSTRUCTOR
@@ -75,8 +75,10 @@ public class UserServiceImpl implements UserService {
         LOGGER.debug("Inside getUserById() method of UserServiceImpl");
         Instant startTime = Instant.now();
         UserEntity userEntity = this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
+        UserDto userDetails = this.modelMapper.map(userEntity,UserDto.class);
+        userDetails.setPassword(null);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
-                .data(UserDto.builder().name(userEntity.getName()).email(userEntity.getEmail()).id(userEntity.getId()).about(userEntity.getAbout()).build())
+                .data(userDetails)
                 .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build())
                 .build();
         return ResponseEntity.ok(response);
