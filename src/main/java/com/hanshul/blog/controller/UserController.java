@@ -1,6 +1,6 @@
 package com.hanshul.blog.controller;
 
-import com.hanshul.blog.payloads.UserDto;
+import com.hanshul.blog.payloads.UserDetailRequestModel;
 import com.hanshul.blog.service.UserService;
 import com.hanshul.blog.utility.BlogAppResponse;
 import com.hanshul.blog.utility.ResponseMeta;
@@ -22,13 +22,13 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<BlogAppResponse> createUser(@Valid @RequestBody UserDto userDto){
-        return this.userService.createUser(userDto);
+    public ResponseEntity<BlogAppResponse> createUser(@Valid @RequestBody UserDetailRequestModel userDetailRequestModel){
+        return this.userService.createUser(userDetailRequestModel);
     }
 
     @PutMapping("/{userId}/update")
-    public ResponseEntity<BlogAppResponse> updateUser(@RequestBody UserDto userDto,@PathVariable("userId") Integer userId){
-        return this.userService.updateUser(userDto,userId);
+    public ResponseEntity<BlogAppResponse> updateUser(@RequestBody UserDetailRequestModel userDetailRequestModel, @PathVariable("userId") Integer userId){
+        return this.userService.updateUser(userDetailRequestModel, userId);
     }
 
     @DeleteMapping("/{userId}/delete")
