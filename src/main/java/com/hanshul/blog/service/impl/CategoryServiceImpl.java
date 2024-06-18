@@ -41,6 +41,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     /////////////////////////////////////////////////
     /////// METHODS
+    /////////////////////////////////////////////////
+    
     @Override
     public ResponseEntity<BlogAppResponse> createCategory(CategoryDetailRequestModel categoryDetailRequestModel) {
         LOGGER.debug("Inside createCategory() method of CategoryServiceImpl");
