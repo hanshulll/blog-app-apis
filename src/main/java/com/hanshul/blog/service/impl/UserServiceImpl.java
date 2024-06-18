@@ -104,6 +104,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Integer userId) {
+        LOGGER.debug("Inside deleteUser() method of UserServiceImpl, userId : {}",userId);
         this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
         this.userRepository.deleteById(userId);
     }
