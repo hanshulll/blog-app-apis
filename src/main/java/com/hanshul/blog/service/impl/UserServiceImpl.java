@@ -1,9 +1,10 @@
 package com.hanshul.blog.service.impl;
 
 
+import com.hanshul.blog.dto.UserDetailDto;
 import com.hanshul.blog.entities.UserEntity;
 import com.hanshul.blog.exceptions.ResourceNotFoundException;
-import com.hanshul.blog.payloads.UserDto;
+import com.hanshul.blog.payloads.UserDetailRequestModel;
 import com.hanshul.blog.repositories.UserRepository;
 import com.hanshul.blog.service.UserService;
 import com.hanshul.blog.utility.BlogAppResponse;
@@ -16,8 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 public class UserServiceImpl implements UserService {
     /////////////////////////////////////////////////
@@ -41,31 +44,32 @@ public class UserServiceImpl implements UserService {
     /////// METHODS
     /////////////////////////////////////////////////
     @Override
-    public ResponseEntity<BlogAppResponse> createUser(UserDto userDto) {
+    public ResponseEntity<BlogAppResponse> createUser(UserDetailRequestModel userDto) {
         LOGGER.debug("Inside createUser() method of UserServiceImpl");
         Instant startTime = Instant.now();
         UserEntity userEntity = this.modelMapper.map(userDto, UserEntity.class);
         UserEntity createdUserDetails = this.userRepository.save(userEntity);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
                 .meta(ResponseMeta.builder().request(userDto).build())
-                .data(createdUserDetails)
+                .data(Map.of("message",String.format("user create successfully with id %s",createdUserDetails.getId())))
                 .build();
-//        return this.modelMapper.map(response, UserDto.class);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<BlogAppResponse> updateUser(UserDto userDto, Integer userId) {
+    public ResponseEntity<BlogAppResponse> updateUser(UserDetailRequestModel userDto, Integer userId) {
         LOGGER.debug("Inside updateUser() method of UserServiceImpl");
         Instant startTime = Instant.now();
-        UserEntity userEntity = this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
-        userEntity.setName(userDto.getName());
-        userEntity.setEmail(userDto.getEmail());
-        userEntity.setPassword(userDto.getPassword());
-        userEntity.setAbout(userDto.getAbout());
+        this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
+        UserEntity userEntity = this.modelMapper.map(userDto,UserEntity.class);
+//        userEntity.setName(userDto.getName());
+//        userEntity.setEmail(userDto.getEmail());
+//        userEntity.setPassword(userDto.getPassword());
+//        userEntity.setAbout(userDto.getAbout());
+        this.userRepository.save(userEntity);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
                 .meta(ResponseMeta.builder().request(userDto).build())
-                .data(this.modelMapper.map(this.userRepository.save(userEntity), UserDto.class))
+                .data(Map.of("message",String.format("User details successfully updated with id %s",userId)))
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -75,8 +79,7 @@ public class UserServiceImpl implements UserService {
         LOGGER.debug("Inside getUserById() method of UserServiceImpl");
         Instant startTime = Instant.now();
         UserEntity userEntity = this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
-        UserDto userDetails = this.modelMapper.map(userEntity,UserDto.class);
-        userDetails.setPassword(null);
+        UserDetailDto userDetails = this.modelMapper.map(userEntity, UserDetailDto.class);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
                 .data(userDetails)
                 .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build())
@@ -88,21 +91,11 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<BlogAppResponse> getAllUsers() {
         Instant startTime = Instant.now();
         List<UserEntity> userEntity = this.userRepository.findAll();
-        List<UserDto> response = new ArrayList<>();
-        userEntity.forEach(user->{
-            UserDto userDto = new UserDto();
-            userDto.setName(user.getName());
-            userDto.setEmail(user.getEmail());
-            userDto.setAbout(user.getAbout());
-            userDto.setId(user.getId());
-            response.add(userDto);
-        });
-//        for (UserEntity user : userEntity) {
-//            UserDto userDto = UserDto.builder().name(user.getName()).email(user.getEmail()).about(user.getAbout()).id(user.getId()).build();
-
-//        }
-//        Below code can be used to map everything we got from DB to DTO but the only drawback here is that it will also map users passwords and will expose them in response
-//        List<UserDto> response = userEntity.stream().map(userEntity1 -> modelMapper.map(userEntity1,UserDto.class)).toList();
+/*
+          Type listType = new TypeToken<List<UserDetailDto>>() {}.getType();
+          List<UserDetailDto> response = this.modelMapper.map(userEntity,listType);
+*/
+        List<UserDetailDto> response = userEntity.stream().map(this::mapUserEntityToUserDetailDto).collect(Collectors.toList());
         return ResponseEntity.ok(BlogAppResponse.builder().success(true).starTime(startTime)
                 .data(response)
                 .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build())
@@ -111,7 +104,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Integer userId) {
+        LOGGER.debug("Inside deleteUser() method of UserServiceImpl, userId : {}",userId);
         this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
         this.userRepository.deleteById(userId);
+    }
+
+
+    ///////////////////////////////////////////////////
+    /////// PRIVATE METHODS
+    ///////////////////////////////////////////////////
+
+    private UserDetailDto mapUserEntityToUserDetailDto(UserEntity userEntity) {
+        return this.modelMapper.map(userEntity,UserDetailDto.class);
     }
 }
