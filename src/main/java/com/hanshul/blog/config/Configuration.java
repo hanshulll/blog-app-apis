@@ -8,12 +8,12 @@ import org.springframework.context.annotation.Bean;
 
 public class Configuration {
     @Bean
-    public ModelMapper modelMapper(){
+    public ModelMapper modelMapper() {
         return new ModelMapper();
     }
 
-//    @Bean
-//    public UserEntity userEntity(){
-//        return new UserEntity();
-//    }
+    // @Bean
+    // public UserEntity userEntity(){
+    // return new UserEntity();
+    // }
 }

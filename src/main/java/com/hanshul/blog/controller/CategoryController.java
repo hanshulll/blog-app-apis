@@ -24,36 +24,38 @@ import java.util.Map;
 public class CategoryController {
     private final CategoryService categoryService;
 
-    public CategoryController(CategoryService categoryService){
+    public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 
     @PostMapping("/create")
-    public ResponseEntity<BlogAppResponse> createCategory(@Valid @RequestBody CategoryDetailRequestModel categoryDetailRequestModel){
+    public ResponseEntity<BlogAppResponse> createCategory(
+            @Valid @RequestBody CategoryDetailRequestModel categoryDetailRequestModel) {
         return this.categoryService.createCategory(categoryDetailRequestModel);
     }
 
     @PutMapping("/{categoryId}/update")
-    public ResponseEntity<BlogAppResponse> updateCategory(@RequestBody CategoryDetailRequestModel categoryDetailRequestModel, @PathVariable("userId") Integer userId){
+    public ResponseEntity<BlogAppResponse> updateCategory(
+            @RequestBody CategoryDetailRequestModel categoryDetailRequestModel,
+            @PathVariable("userId") Integer userId) {
         return this.categoryService.updateCategory(categoryDetailRequestModel, userId);
     }
 
     @DeleteMapping("/{categoryId}/delete")
-    public ResponseEntity<?> deleteCategory(@PathVariable("categoryId") Integer categoryId){
+    public ResponseEntity<?> deleteCategory(@PathVariable("categoryId") Integer categoryId) {
         this.categoryService.deleteCategory(categoryId);
-        return ResponseEntity.ok(BlogAppResponse.builder().success(true).starTime(Instant.now()).
-                data(Map.of("message","User deleted successfully"))
-                .meta(ResponseMeta.builder().status(HttpStatus.OK.value())
-                        .build()).build());
+        return ResponseEntity.ok(BlogAppResponse.builder().success(true).starTime(Instant.now())
+                .data(Map.of("message", "User deleted successfully"))
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).build());
     }
 
     @GetMapping("/{categoryId}/get")
-    public ResponseEntity<BlogAppResponse> getCategoryById(@PathVariable("userId") Integer userId){
+    public ResponseEntity<BlogAppResponse> getCategoryById(@PathVariable("userId") Integer userId) {
         return this.categoryService.getCategoryById(userId);
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<BlogAppResponse> getAllCategories(){
+    public ResponseEntity<BlogAppResponse> getAllCategories() {
         return this.categoryService.getAllCategories();
     }
 }

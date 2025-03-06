@@ -29,7 +29,6 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     public static final Logger LOGGER = LoggerFactory.getLogger(CategoryServiceImpl.class);
 
-
     /////////////////////////////////////////////////
     /////// CONSTRUCTOR
     /////////////////////////////////////////////////
@@ -42,52 +41,54 @@ public class CategoryServiceImpl implements CategoryService {
     /////////////////////////////////////////////////
     /////// METHODS
     /////////////////////////////////////////////////
-    
+
     @Override
     public ResponseEntity<BlogAppResponse> createCategory(CategoryDetailRequestModel categoryDetailRequestModel) {
         LOGGER.debug("Inside createCategory() method of CategoryServiceImpl");
         Instant startTime = Instant.now();
-        CategoryEntity entity = this.modelMapper.map(categoryDetailRequestModel,CategoryEntity.class);
+        CategoryEntity entity = this.modelMapper.map(categoryDetailRequestModel, CategoryEntity.class);
         CategoryEntity createdCategory = this.categoryRepository.save(entity);
 
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
-                .meta(ResponseMeta.builder().request(categoryDetailRequestModel).build())
-                .data(Map.of("message",String.format("category created successfully with id %s",createdCategory.getId())))
+                .meta(ResponseMeta.builder().request(categoryDetailRequestModel).build()).data(Map.of("message",
+                        String.format("category created successfully with id %s", createdCategory.getId())))
                 .build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<BlogAppResponse> updateCategory(CategoryDetailRequestModel categoryDetailRequestModel, Integer categoryId) {
-        LOGGER.debug("Inside updateCategory() method of CategoryServiceImpl, categoryId : {}",categoryId);
+    public ResponseEntity<BlogAppResponse> updateCategory(CategoryDetailRequestModel categoryDetailRequestModel,
+            Integer categoryId) {
+        LOGGER.debug("Inside updateCategory() method of CategoryServiceImpl, categoryId : {}", categoryId);
         Instant startTime = Instant.now();
-        this.categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", "Id", categoryId));
-        CategoryEntity categoryEntity = this.modelMapper.map(categoryDetailRequestModel,CategoryEntity.class);
+        this.categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "Id", categoryId));
+        CategoryEntity categoryEntity = this.modelMapper.map(categoryDetailRequestModel, CategoryEntity.class);
         this.categoryRepository.save(categoryEntity);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
                 .meta(ResponseMeta.builder().request(categoryDetailRequestModel).build())
-                .data(Map.of("message",String.format("Category details successfully updated with id %s",categoryId)))
+                .data(Map.of("message", String.format("Category details successfully updated with id %s", categoryId)))
                 .build();
         return ResponseEntity.ok(response);
     }
 
     @Override
     public void deleteCategory(Integer categoryId) {
-        LOGGER.debug("Inside deleteCategory() method of CategoryServiceImpl, categoryId : {}",categoryId);
-        this.categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", "Id", categoryId));
+        LOGGER.debug("Inside deleteCategory() method of CategoryServiceImpl, categoryId : {}", categoryId);
+        this.categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "Id", categoryId));
         this.categoryRepository.deleteById(categoryId);
     }
 
     @Override
     public ResponseEntity<BlogAppResponse> getCategoryById(Integer categoryId) {
-        LOGGER.debug("Inside getCategoryById() method of CategoryServiceImpl, categoryId : {}",categoryId);
+        LOGGER.debug("Inside getCategoryById() method of CategoryServiceImpl, categoryId : {}", categoryId);
         Instant startTime = Instant.now();
-        CategoryEntity categoryEntity = this.categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", "Id", categoryId));
+        CategoryEntity categoryEntity = this.categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "Id", categoryId));
         CategoryDto categoryDto = this.modelMapper.map(categoryEntity, CategoryDto.class);
-        BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
-                .data(categoryDto)
-                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build())
-                .build();
+        BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime).data(categoryDto)
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).build();
         return ResponseEntity.ok(response);
     }
 
@@ -95,11 +96,10 @@ public class CategoryServiceImpl implements CategoryService {
     public ResponseEntity<BlogAppResponse> getAllCategories() {
         Instant startTime = Instant.now();
         List<CategoryEntity> userEntity = this.categoryRepository.findAll();
-        List<CategoryDto> response = userEntity.stream().map(this::mapCategoryrEntityToCategoryDto).collect(Collectors.toList());
-        return ResponseEntity.ok(BlogAppResponse.builder().success(true).starTime(startTime)
-                .data(response)
-                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build())
-                .build());
+        List<CategoryDto> response = userEntity.stream().map(this::mapCategoryrEntityToCategoryDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(BlogAppResponse.builder().success(true).starTime(startTime).data(response)
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).build());
     }
 
     ///////////////////////////////////////////////////
@@ -107,6 +107,6 @@ public class CategoryServiceImpl implements CategoryService {
     ///////////////////////////////////////////////////
 
     private CategoryDto mapCategoryrEntityToCategoryDto(CategoryEntity categoryEntity) {
-        return this.modelMapper.map(categoryEntity,CategoryDto.class);
+        return this.modelMapper.map(categoryEntity, CategoryDto.class);
     }
 }

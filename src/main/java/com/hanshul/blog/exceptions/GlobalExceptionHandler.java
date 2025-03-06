@@ -18,19 +18,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<BlogAppResponse> resourceNotFoundExceptionHandler(ResourceNotFoundException exception) {
         Instant startTime = Instant.now();
-        BlogAppResponse response = BlogAppResponse.builder().success(false).starTime(startTime).data(exception.getMessage())
-                .meta(ResponseMeta.builder().status(HttpStatus.NOT_FOUND.value()).build())
+        BlogAppResponse response = BlogAppResponse.builder().success(false).starTime(startTime)
+                .data(exception.getMessage()).meta(ResponseMeta.builder().status(HttpStatus.NOT_FOUND.value()).build())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> methodArgumentNotValidException(MethodArgumentNotValidException exception) {
+    public ResponseEntity<Map<String, String>> methodArgumentNotValidException(
+            MethodArgumentNotValidException exception) {
         Map<String, String> response = new HashMap<>();
         exception.getBindingResult().getAllErrors().forEach(error -> {
             response.put(((FieldError) error).getField(), error.getDefaultMessage());
         });
-        response.put("status",String.valueOf(HttpStatus.BAD_REQUEST));
-        return new ResponseEntity<Map<String,String>>(response,HttpStatus.BAD_REQUEST);
+        response.put("status", String.valueOf(HttpStatus.BAD_REQUEST));
+        return new ResponseEntity<Map<String, String>>(response, HttpStatus.BAD_REQUEST);
     }
 }
