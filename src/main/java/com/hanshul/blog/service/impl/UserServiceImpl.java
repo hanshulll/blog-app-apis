@@ -1,6 +1,5 @@
 package com.hanshul.blog.service.impl;
 
-
 import com.hanshul.blog.dto.UserDetailDto;
 import com.hanshul.blog.entities.UserEntity;
 import com.hanshul.blog.exceptions.ResourceNotFoundException;
@@ -30,7 +29,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     public static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
-
     /////////////////////////////////////////////////
     /////// CONSTRUCTOR
     /////////////////////////////////////////////////
@@ -50,8 +48,8 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = this.modelMapper.map(userDto, UserEntity.class);
         UserEntity createdUserDetails = this.userRepository.save(userEntity);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
-                .meta(ResponseMeta.builder().request(userDto).build())
-                .data(Map.of("message",String.format("user create successfully with id %s",createdUserDetails.getId())))
+                .meta(ResponseMeta.builder().request(userDto).build()).data(Map.of("message",
+                        String.format("user create successfully with id %s", createdUserDetails.getId())))
                 .build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -61,16 +59,15 @@ public class UserServiceImpl implements UserService {
         LOGGER.debug("Inside updateUser() method of UserServiceImpl");
         Instant startTime = Instant.now();
         this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
-        UserEntity userEntity = this.modelMapper.map(userDto,UserEntity.class);
-//        userEntity.setName(userDto.getName());
-//        userEntity.setEmail(userDto.getEmail());
-//        userEntity.setPassword(userDto.getPassword());
-//        userEntity.setAbout(userDto.getAbout());
+        UserEntity userEntity = this.modelMapper.map(userDto, UserEntity.class);
+        // userEntity.setName(userDto.getName());
+        // userEntity.setEmail(userDto.getEmail());
+        // userEntity.setPassword(userDto.getPassword());
+        // userEntity.setAbout(userDto.getAbout());
         this.userRepository.save(userEntity);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
                 .meta(ResponseMeta.builder().request(userDto).build())
-                .data(Map.of("message",String.format("User details successfully updated with id %s",userId)))
-                .build();
+                .data(Map.of("message", String.format("User details successfully updated with id %s", userId))).build();
         return ResponseEntity.ok(response);
     }
 
@@ -78,12 +75,11 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<BlogAppResponse> getUserById(Integer userId) {
         LOGGER.debug("Inside getUserById() method of UserServiceImpl");
         Instant startTime = Instant.now();
-        UserEntity userEntity = this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
+        UserEntity userEntity = this.userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
         UserDetailDto userDetails = this.modelMapper.map(userEntity, UserDetailDto.class);
-        BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
-                .data(userDetails)
-                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build())
-                .build();
+        BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime).data(userDetails)
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).build();
         return ResponseEntity.ok(response);
     }
 
@@ -91,30 +87,28 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<BlogAppResponse> getAllUsers() {
         Instant startTime = Instant.now();
         List<UserEntity> userEntity = this.userRepository.findAll();
-/*
-          Type listType = new TypeToken<List<UserDetailDto>>() {}.getType();
-          List<UserDetailDto> response = this.modelMapper.map(userEntity,listType);
-*/
-        List<UserDetailDto> response = userEntity.stream().map(this::mapUserEntityToUserDetailDto).collect(Collectors.toList());
-        return ResponseEntity.ok(BlogAppResponse.builder().success(true).starTime(startTime)
-                .data(response)
-                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build())
-                .build());
+        /*
+         * Type listType = new TypeToken<List<UserDetailDto>>() {}.getType();
+         * List<UserDetailDto> response = this.modelMapper.map(userEntity,listType);
+         */
+        List<UserDetailDto> response = userEntity.stream().map(this::mapUserEntityToUserDetailDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(BlogAppResponse.builder().success(true).starTime(startTime).data(response)
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).build());
     }
 
     @Override
     public void deleteUser(Integer userId) {
-        LOGGER.debug("Inside deleteUser() method of UserServiceImpl, userId : {}",userId);
+        LOGGER.debug("Inside deleteUser() method of UserServiceImpl, userId : {}", userId);
         this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
         this.userRepository.deleteById(userId);
     }
-
 
     ///////////////////////////////////////////////////
     /////// PRIVATE METHODS
     ///////////////////////////////////////////////////
 
     private UserDetailDto mapUserEntityToUserDetailDto(UserEntity userEntity) {
-        return this.modelMapper.map(userEntity,UserDetailDto.class);
+        return this.modelMapper.map(userEntity, UserDetailDto.class);
     }
 }

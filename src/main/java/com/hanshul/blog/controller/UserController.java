@@ -17,36 +17,37 @@ import java.util.Map;
 public class UserController {
     private UserService userService;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @PostMapping("/create")
-    public ResponseEntity<BlogAppResponse> createUser(@Valid @RequestBody UserDetailRequestModel userDetailRequestModel){
+    public ResponseEntity<BlogAppResponse> createUser(
+            @Valid @RequestBody UserDetailRequestModel userDetailRequestModel) {
         return this.userService.createUser(userDetailRequestModel);
     }
 
     @PutMapping("/{userId}/update")
-    public ResponseEntity<BlogAppResponse> updateUser(@RequestBody UserDetailRequestModel userDetailRequestModel, @PathVariable("userId") Integer userId){
+    public ResponseEntity<BlogAppResponse> updateUser(@RequestBody UserDetailRequestModel userDetailRequestModel,
+            @PathVariable("userId") Integer userId) {
         return this.userService.updateUser(userDetailRequestModel, userId);
     }
 
     @DeleteMapping("/{userId}/delete")
-    public ResponseEntity<?> deleteUser(@PathVariable("userId") Integer userId){
+    public ResponseEntity<?> deleteUser(@PathVariable("userId") Integer userId) {
         this.userService.deleteUser(userId);
-        return ResponseEntity.ok(BlogAppResponse.builder().success(true).starTime(Instant.now()).
-                data(Map.of("message","User deleted successfully"))
-                .meta(ResponseMeta.builder().status(HttpStatus.OK.value())
-                        .build()).build());
+        return ResponseEntity.ok(BlogAppResponse.builder().success(true).starTime(Instant.now())
+                .data(Map.of("message", "User deleted successfully"))
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).build());
     }
 
     @GetMapping("/{userId}/get")
-    public ResponseEntity<BlogAppResponse> getUserById(@PathVariable("userId") Integer userId){
+    public ResponseEntity<BlogAppResponse> getUserById(@PathVariable("userId") Integer userId) {
         return this.userService.getUserById(userId);
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<BlogAppResponse> getAllUsers(){
+    public ResponseEntity<BlogAppResponse> getAllUsers() {
         return this.userService.getAllUsers();
     }
 }

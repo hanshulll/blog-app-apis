@@ -24,7 +24,7 @@ public class UserDetailRequestModel {
     @Email(message = "Your email is not valid")
     private String email;
     @NotEmpty
-    @Size(min = 3,max = 10, message = "Password must be minimum of 3 characters and maximum of 10 characters")
+    @Size(min = 3, max = 10, message = "Password must be minimum of 3 characters and maximum of 10 characters")
     private String password;
     @NotEmpty
     private String about;

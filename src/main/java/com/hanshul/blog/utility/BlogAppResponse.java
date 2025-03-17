@@ -16,7 +16,7 @@ public class BlogAppResponse<T, M> {
 
     private boolean success;
 
-//    private String id;
+    // private String id;
 
     private ResponseMeta<M> meta;
 
@@ -26,13 +26,13 @@ public class BlogAppResponse<T, M> {
     @JsonIgnore
     private Instant starTime;
 
-    public static class BlogAppResponseBuilder<T,M> {
-        public BlogAppResponseBuilder meta(ResponseMeta<M> meta){
+    public static class BlogAppResponseBuilder<T, M> {
+        public BlogAppResponseBuilder meta(ResponseMeta<M> meta) {
             ResponseMeta responseMeta = new ResponseMeta<>();
             responseMeta.setStatus(meta.getStatus());
-            responseMeta.setTook(Duration.between(starTime,Instant.now()).toMillis());
+            responseMeta.setTook(Duration.between(starTime, Instant.now()).toMillis());
             responseMeta.setRequest(meta.getRequest());
-//            responseMeta.setEvent(meta.getEvent());
+            // responseMeta.setEvent(meta.getEvent());
             this.meta = meta;
             return this;
         }
