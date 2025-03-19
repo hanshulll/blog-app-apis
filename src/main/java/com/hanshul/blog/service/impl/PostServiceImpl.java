@@ -59,7 +59,8 @@ public class PostServiceImpl implements PostService {
                 .imageName("default.png").addedDate(new Date()).user(user).category(category).build();
         UserPostEntity savedPost = this.postRepository.save(post);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
-                .meta(ResponseMeta.builder().request(requestBody).build()).data(Map.of("message",
+                .meta(ResponseMeta.builder().status(HttpStatus.CREATED.value()).request(requestBody).build())
+                .data(Map.of("message",
                         String.format("Post created successfully with post_id %s", savedPost.getPostId())))
                 .build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
