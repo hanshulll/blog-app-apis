@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 
@@ -32,10 +33,13 @@ public class UserPostEntity {
     @Column(length = 10000, nullable = false)
     private String content;
     private String imageName;
+    @CreationTimestamp
     private Date addedDate;
     @ManyToOne
     @JoinColumn(name = "category_id")
+    // @JsonBackReference
     private CategoryEntity category;
     @ManyToOne
+    // @JsonBackReference
     private UserEntity user;
 }

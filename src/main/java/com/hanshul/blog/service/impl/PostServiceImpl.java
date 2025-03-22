@@ -1,5 +1,6 @@
 package com.hanshul.blog.service.impl;
 
+import com.hanshul.blog.dto.PaginationMetaDto;
 import com.hanshul.blog.dto.PostDto;
 import com.hanshul.blog.entities.CategoryEntity;
 import com.hanshul.blog.entities.UserEntity;
@@ -13,14 +14,15 @@ import com.hanshul.blog.service.PostService;
 import com.hanshul.blog.utility.BlogAppResponse;
 import com.hanshul.blog.utility.ResponseMeta;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -62,7 +64,7 @@ public class PostServiceImpl implements PostService {
         CategoryEntity category = this.categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "Category Id", categoryId));
         UserPostEntity post = UserPostEntity.builder().content(requestBody.getContent()).title(requestBody.getTitle())
-                .imageName("default.png").addedDate(new Date()).user(user).category(category).build();
+                .imageName("default.png").user(user).category(category).build();
         UserPostEntity savedPost = this.postRepository.save(post);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
                 .meta(ResponseMeta.builder().status(HttpStatus.CREATED.value()).request(requestBody).build())
@@ -73,36 +75,63 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResponseEntity<BlogAppResponse> updatePost(PostDto createPostRequestBody, Integer postId) {
-        return null;
+    public ResponseEntity<BlogAppResponse> updatePost(CreatePostRequestModel createPostRequestBody, Integer postId) {
+        Instant startTime = Instant.now();
+        UserPostEntity postToBeUpdated = this.postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "Post Id", postId));
+        postToBeUpdated.setTitle(createPostRequestBody.getTitle());
+        postToBeUpdated.setContent(createPostRequestBody.getContent());
+        this.postRepository.save(postToBeUpdated);
+        BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build())
+                .data(Map.of("status", String.format("Request to update post with postId %s is received", postId)))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<BlogAppResponse> deletePost(Integer postId) {
-        return null;
+        Instant startTime = Instant.now();
+        UserPostEntity postToDelete = this.postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "Post Id", postId));
+        this.postRepository.delete(postToDelete);
+        BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build())
+                .data(Map.of("status", String.format("Request to delete post with postId %s is received", postId)))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<BlogAppResponse> getAllPost() {
+    public ResponseEntity<BlogAppResponse> getAllPost(int pageNumber, int pageSize, String sortBy, String sortOrder) {
         Instant startTime = Instant.now();
-        Pageable pageable = PageRequest.of(0, 100);
-        List<UserPostEntity> allPosts = this.postRepository.findTop100Posts(pageable);
-        List<PostDto> allPostsData = this.mapUserPostEntityToDto.apply(allPosts);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,
+                "asc".equalsIgnoreCase(sortOrder) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+        Page<UserPostEntity> allPosts = this.postRepository.findAll(pageable);
+        List<PostDto> allPostsData = this.mapUserPostEntityToDto.apply(allPosts.getContent());
+        PaginationMetaDto paginationMeta = this.populatePaginationMetaDto.apply(allPosts);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
-                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).data(allPostsData).build();
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build())
+                .data(Map.of("posts", allPostsData, "pageMeta", paginationMeta)).build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<BlogAppResponse> getPostById(Integer postId) {
-        return null;
+        Instant startTime = Instant.now();
+        UserPostEntity userPosts = this.postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "Post Id", postId));
+        PostDto post = this.modelMapper.map(userPosts, PostDto.class);
+        BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).data(post).build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<BlogAppResponse> getPostByCategory(Integer categoryId) {
         Instant startTime = Instant.now();
         CategoryEntity category = this.categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category", "Category Id", categoryId));
+                .orElseThrow(() -> new ResourceNotFoundException("Posts", "Category Id", categoryId));
         List<UserPostEntity> postsEntity = this.postRepository.findByCategory(category);
         List<PostDto> postDto = this.mapUserPostEntityToDto.apply(postsEntity);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
@@ -114,7 +143,7 @@ public class PostServiceImpl implements PostService {
     public ResponseEntity<BlogAppResponse> getPostByUser(Integer userId) {
         Instant startTime = Instant.now();
         UserEntity user = this.userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "User Id", userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "User Id", userId));
         List<UserPostEntity> postsEntity = this.postRepository.findByUser(user);
         List<PostDto> postDto = this.mapUserPostEntityToDto.apply(postsEntity);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
@@ -124,7 +153,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public ResponseEntity<BlogAppResponse> searchPostByKeyword(String keyword) {
-        return null;
+        Instant startTime = Instant.now();
+        List<UserPostEntity> postEntities = this.postRepository.findByTitleContaining(keyword);
+        List<PostDto> postDto = this.mapUserPostEntityToDto.apply(postEntities);
+        BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).data(postDto).build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /////////////////////////////////////////////////
@@ -133,4 +167,9 @@ public class PostServiceImpl implements PostService {
 
     Function<List<UserPostEntity>, List<PostDto>> mapUserPostEntityToDto = (userPostEntities -> userPostEntities
             .stream().map(post -> this.modelMapper.map(post, PostDto.class)).toList());
+
+    Function<Page<UserPostEntity>, PaginationMetaDto> populatePaginationMetaDto = pageMeta -> PaginationMetaDto
+            .builder().currentPageNumber(pageMeta.getNumber()).currentPageSize(pageMeta.getSize())
+            .totalElements(pageMeta.getTotalElements()).totalPages(pageMeta.getTotalPages() - 1)
+            .lastPage(pageMeta.isLast()).build();
 }
