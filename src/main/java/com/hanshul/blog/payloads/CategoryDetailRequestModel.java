@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CategoryDetailRequestModel {
-    private Integer categoryId;
     private String categoryTitle;
     private String categoryDescription;
 }

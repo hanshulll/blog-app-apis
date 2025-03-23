@@ -3,16 +3,19 @@ package com.hanshul.blog.service.impl;
 import com.hanshul.blog.dto.PaginationMetaDto;
 import com.hanshul.blog.dto.PostDto;
 import com.hanshul.blog.entities.CategoryEntity;
+import com.hanshul.blog.entities.ImageEntity;
 import com.hanshul.blog.entities.UserEntity;
 import com.hanshul.blog.entities.UserPostEntity;
 import com.hanshul.blog.exceptions.ResourceNotFoundException;
 import com.hanshul.blog.payloads.CreatePostRequestModel;
 import com.hanshul.blog.repositories.CategoryRepository;
+import com.hanshul.blog.repositories.ImageUploadRepository;
 import com.hanshul.blog.repositories.PostRepository;
 import com.hanshul.blog.repositories.UserRepository;
 import com.hanshul.blog.service.PostService;
 import com.hanshul.blog.utility.BlogAppResponse;
 import com.hanshul.blog.utility.ResponseMeta;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,51 +24,64 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class PostServiceImpl implements PostService {
 
-    /////////////////////////////////////////////////
-    ///// VARIABLES
-    /////////////////////////////////////////////////
+    /// //////////////////////////////////////////////
+    /// // VARIABLES
+    /// //////////////////////////////////////////////
 
     private PostRepository postRepository;
     private UserRepository userRepository;
     private CategoryRepository categoryRepository;
     private ModelMapper modelMapper;
+    private ImageUploadRepository imageRepository;
 
-    /////////////////////////////////////////////////
-    /////// CONSTRUCTOR
-    /////////////////////////////////////////////////
+    /// //////////////////////////////////////////////
+    /// //// CONSTRUCTOR
+    /// //////////////////////////////////////////////
 
     public PostServiceImpl(PostRepository postRepository, ModelMapper modelMapper, UserRepository userRepository,
-            CategoryRepository categoryRepository) {
+            CategoryRepository categoryRepository, ImageUploadRepository imageRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.modelMapper = modelMapper;
+        this.imageRepository = imageRepository;
     }
 
-    /////////////////////////////////////////////////
-    /////// METHODS
-    /////////////////////////////////////////////////
+    /// //////////////////////////////////////////////
+    /// //// METHODS
+    /// //////////////////////////////////////////////
 
+    @Transactional
     @Override
     public ResponseEntity<BlogAppResponse> createPost(CreatePostRequestModel requestBody, Integer userId,
-            Integer categoryId) {
+            Integer categoryId, List<MultipartFile> files) {
         Instant startTime = Instant.now();
         UserEntity user = this.userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "User Id", userId));
         CategoryEntity category = this.categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "Category Id", categoryId));
         UserPostEntity post = UserPostEntity.builder().content(requestBody.getContent()).title(requestBody.getTitle())
-                .imageName("default.png").user(user).category(category).build();
+                .user(user).category(category).build();
         UserPostEntity savedPost = this.postRepository.save(post);
+        if (!files.isEmpty()) {
+            List<ImageEntity> populatedImageEntities = this.populateImageEntity(files, savedPost);
+            this.imageRepository.saveAll(populatedImageEntities);
+        }
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
                 .meta(ResponseMeta.builder().status(HttpStatus.CREATED.value()).request(requestBody).build())
                 .data(Map.of("message",
@@ -161,9 +177,9 @@ public class PostServiceImpl implements PostService {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    /////////////////////////////////////////////////
-    ///// PRIVATE METHODS || HELPER METHODS
-    /////////////////////////////////////////////////
+    /// //////////////////////////////////////////////
+    /// // PRIVATE METHODS || HELPER METHODS
+    /// //////////////////////////////////////////////
 
     Function<List<UserPostEntity>, List<PostDto>> mapUserPostEntityToDto = (userPostEntities -> userPostEntities
             .stream().map(post -> this.modelMapper.map(post, PostDto.class)).toList());
@@ -172,4 +188,18 @@ public class PostServiceImpl implements PostService {
             .builder().currentPageNumber(pageMeta.getNumber()).currentPageSize(pageMeta.getSize())
             .totalElements(pageMeta.getTotalElements()).totalPages(pageMeta.getTotalPages() - 1)
             .lastPage(pageMeta.isLast()).build();
+
+    private List<ImageEntity> populateImageEntity(List<MultipartFile> postImages, UserPostEntity post) {
+        return postImages.stream().map(imageData -> {
+            try {
+                return ImageEntity.builder().image(imageData.getBytes()).fileName(imageData.getOriginalFilename())
+                        .fileType(imageData.getContentType()).post(post).build();
+            } catch (IOException e) {
+                log.error("Error occurred while creating ImageEntity for file: {} - {}",
+                        imageData.getOriginalFilename(), e.getMessage());
+                return null;
+            }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
 }

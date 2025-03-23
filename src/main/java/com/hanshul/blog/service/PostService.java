@@ -3,9 +3,13 @@ package com.hanshul.blog.service;
 import com.hanshul.blog.payloads.CreatePostRequestModel;
 import com.hanshul.blog.utility.BlogAppResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface PostService {
-    ResponseEntity<BlogAppResponse> createPost(CreatePostRequestModel requestBody, Integer userId, Integer categoryId);
+    ResponseEntity<BlogAppResponse> createPost(CreatePostRequestModel requestBody, Integer userId, Integer categoryId,
+            List<MultipartFile> files);
     ResponseEntity<BlogAppResponse> updatePost(CreatePostRequestModel createPostRequestBody, Integer postId);
     ResponseEntity<BlogAppResponse> deletePost(Integer postId);
     ResponseEntity<BlogAppResponse> getAllPost(int pageNumber, int pageSize, String sortBy, String sortOrder);

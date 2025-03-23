@@ -5,6 +5,8 @@ import com.hanshul.blog.service.PostService;
 import com.hanshul.blog.utility.BlogAppResponse;
 import com.hanshul.blog.utility.Constant;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +16,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -37,10 +43,11 @@ public class PostController {
     /////// METHODS
     /////////////////////////////////////////////////
 
-    @PostMapping("/users/{userId}/categories/{categoryId}/posts")
+    @PostMapping(value = "/users/{userId}/category/{categoryId}/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<BlogAppResponse> createPost(@PathVariable("userId") Integer userId,
-            @PathVariable("categoryId") Integer categoryId, @Valid @RequestBody CreatePostRequestModel requestBody) {
-        return this.postService.createPost(requestBody, userId, categoryId);
+            @PathVariable("categoryId") Integer categoryId, @Valid @RequestPart CreatePostRequestModel requestBody,
+            @Valid @Size(max = 5) @RequestPart(required = false ) List<MultipartFile> files) {
+        return this.postService.createPost(requestBody, userId, categoryId, files);
     }
 
     @GetMapping("/category/{categoryId}/posts")
