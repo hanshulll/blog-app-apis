@@ -7,6 +7,7 @@ import com.hanshul.blog.utility.ResponseMeta;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -33,6 +34,7 @@ public class UserController {
         return this.userService.updateUser(userDetailRequestModel, userId);
     }
 
+    @PreAuthorize(value = "hasRole('ADMIN')")
     @DeleteMapping("/{userId}/delete")
     public ResponseEntity<?> deleteUser(@PathVariable("userId") Integer userId) {
         this.userService.deleteUser(userId);

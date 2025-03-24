@@ -6,7 +6,7 @@ import com.hanshul.blog.dto.PostDto;
 import com.hanshul.blog.entities.CategoryEntity;
 import com.hanshul.blog.entities.ImageEntity;
 import com.hanshul.blog.entities.UserEntity;
-import com.hanshul.blog.entities.UserPostEntity;
+import com.hanshul.blog.entities.PostEntity;
 import com.hanshul.blog.exceptions.ResourceNotFoundException;
 import com.hanshul.blog.payloads.CreatePostRequestModel;
 import com.hanshul.blog.repositories.CategoryRepository;
@@ -77,9 +77,9 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "User Id", userId));
         CategoryEntity category = this.categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "Category Id", categoryId));
-        UserPostEntity post = UserPostEntity.builder().content(requestBody.getContent()).title(requestBody.getTitle())
+        PostEntity post = PostEntity.builder().content(requestBody.getContent()).title(requestBody.getTitle())
                 .user(user).category(category).build();
-        UserPostEntity savedPost = this.postRepository.save(post);
+        PostEntity savedPost = this.postRepository.save(post);
         if (!files.isEmpty()) {
             List<ImageEntity> populatedImageEntities = this.populateImageEntity(files, savedPost);
             this.imageRepository.saveAll(populatedImageEntities);
@@ -95,7 +95,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public ResponseEntity<BlogAppResponse> updatePost(CreatePostRequestModel createPostRequestBody, Integer postId) {
         Instant startTime = Instant.now();
-        UserPostEntity postToBeUpdated = this.postRepository.findById(postId)
+        PostEntity postToBeUpdated = this.postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "Post Id", postId));
         postToBeUpdated.setTitle(createPostRequestBody.getTitle());
         postToBeUpdated.setContent(createPostRequestBody.getContent());
@@ -110,7 +110,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public ResponseEntity<BlogAppResponse> deletePost(Integer postId) {
         Instant startTime = Instant.now();
-        UserPostEntity postToDelete = this.postRepository.findById(postId)
+        PostEntity postToDelete = this.postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "Post Id", postId));
         this.postRepository.delete(postToDelete);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
@@ -125,7 +125,7 @@ public class PostServiceImpl implements PostService {
         Instant startTime = Instant.now();
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
                 "asc".equalsIgnoreCase(sortOrder) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
-        Page<UserPostEntity> allPosts = this.postRepository.findAll(pageable);
+        Page<PostEntity> allPosts = this.postRepository.findAll(pageable);
         List<PostDto> allPostsData = this.mapUserPostEntityToDto.apply(allPosts.getContent());
         PaginationMetaDto paginationMeta = this.populatePaginationMetaDto.apply(allPosts);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
@@ -137,7 +137,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public ResponseEntity<BlogAppResponse> getPostById(Integer postId) {
         Instant startTime = Instant.now();
-        UserPostEntity userPosts = this.postRepository.findById(postId)
+        PostEntity userPosts = this.postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "Post Id", postId));
         PostDto post = this.modelMapper.map(userPosts, PostDto.class);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
@@ -150,7 +150,7 @@ public class PostServiceImpl implements PostService {
         Instant startTime = Instant.now();
         CategoryEntity category = this.categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Posts", "Category Id", categoryId));
-        List<UserPostEntity> postsEntity = this.postRepository.findByCategory(category);
+        List<PostEntity> postsEntity = this.postRepository.findByCategory(category);
         List<PostDto> postDto = this.mapUserPostEntityToDto.apply(postsEntity);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
                 .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).data(postDto).build();
@@ -162,7 +162,7 @@ public class PostServiceImpl implements PostService {
         Instant startTime = Instant.now();
         UserEntity user = this.userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "User Id", userId));
-        List<UserPostEntity> postsEntity = this.postRepository.findByUser(user);
+        List<PostEntity> postsEntity = this.postRepository.findByUser(user);
         List<PostDto> postDto = this.mapUserPostEntityToDto.apply(postsEntity);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
                 .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).data(postDto).build();
@@ -172,7 +172,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public ResponseEntity<BlogAppResponse> searchPostByKeyword(String keyword) {
         Instant startTime = Instant.now();
-        List<UserPostEntity> postEntities = this.postRepository.findByTitleContaining(keyword);
+        List<PostEntity> postEntities = this.postRepository.findByTitleContaining(keyword);
         List<PostDto> postDto = this.mapUserPostEntityToDto.apply(postEntities);
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
                 .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).data(postDto).build();
@@ -185,7 +185,7 @@ public class PostServiceImpl implements PostService {
         List<ImageMetaDto> imageMeta = new ArrayList<>();
         UserEntity user = this.userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "User id", userId));
-        UserPostEntity post = this.postRepository.findById(postId)
+        PostEntity post = this.postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "Post id", postId));
         if (Objects.equals(user.getId(), post.getUser().getId())) {
             List<ImageEntity> images = this.imageRepository.findByPost(post);
@@ -200,18 +200,18 @@ public class PostServiceImpl implements PostService {
     /// // PRIVATE METHODS || HELPER METHODS
     /// //////////////////////////////////////////////
 
-    Function<List<UserPostEntity>, List<PostDto>> mapUserPostEntityToDto = (userPostEntities -> userPostEntities
-            .stream().map(post -> this.modelMapper.map(post, PostDto.class)).toList());
+    Function<List<PostEntity>, List<PostDto>> mapUserPostEntityToDto = (userPostEntities -> userPostEntities.stream()
+            .map(post -> this.modelMapper.map(post, PostDto.class)).toList());
 
-    Function<Page<UserPostEntity>, PaginationMetaDto> populatePaginationMetaDto = pageMeta -> PaginationMetaDto
-            .builder().currentPageNumber(pageMeta.getNumber()).currentPageSize(pageMeta.getSize())
+    Function<Page<PostEntity>, PaginationMetaDto> populatePaginationMetaDto = pageMeta -> PaginationMetaDto.builder()
+            .currentPageNumber(pageMeta.getNumber()).currentPageSize(pageMeta.getSize())
             .totalElements(pageMeta.getTotalElements()).totalPages(pageMeta.getTotalPages() - 1)
             .lastPage(pageMeta.isLast()).build();
 
     Function<List<ImageEntity>, List<ImageMetaDto>> mapImageEntityToImageDto = imageEntities -> imageEntities.stream()
             .map(image -> this.modelMapper.map(image, ImageMetaDto.class)).toList();
 
-    private List<ImageEntity> populateImageEntity(List<MultipartFile> postImages, UserPostEntity post) {
+    private List<ImageEntity> populateImageEntity(List<MultipartFile> postImages, PostEntity post) {
         return postImages.stream().map(imageData -> {
             try {
                 return ImageEntity.builder().image(imageData.getBytes()).fileName(imageData.getOriginalFilename())

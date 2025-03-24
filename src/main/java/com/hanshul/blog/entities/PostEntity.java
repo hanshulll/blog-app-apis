@@ -1,5 +1,6 @@
 package com.hanshul.blog.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,10 +17,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "post")
@@ -28,7 +31,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserPostEntity {
+@ToString
+public class PostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer postId;
@@ -43,12 +47,13 @@ public class UserPostEntity {
     private Date createdAt;
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false, referencedColumnName = "id")
-    // @JsonBackReference
     private CategoryEntity category;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
-    // @JsonBackReference
     private UserEntity user;
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ImageEntity> imageMeta;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnore
+    private Set<CommentEntity> comments;
 }
