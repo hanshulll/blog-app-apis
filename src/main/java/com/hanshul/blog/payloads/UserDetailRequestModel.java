@@ -17,7 +17,6 @@ import lombok.Setter;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDetailRequestModel {
-    private int id;
     @NotEmpty
     @Size(min = 3, message = "username must be minimum of 3 characters")
     private String name;

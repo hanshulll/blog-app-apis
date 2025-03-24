@@ -10,6 +10,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PostDto {
+    private Integer postId;
     private String title;
     private String content;
+    private CategoryDto category;
+    private UserDetailDto user;
 }
