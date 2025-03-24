@@ -1,5 +1,6 @@
 package com.hanshul.blog.service.impl;
 
+import com.hanshul.blog.dto.ImageMetaDto;
 import com.hanshul.blog.dto.PaginationMetaDto;
 import com.hanshul.blog.dto.PostDto;
 import com.hanshul.blog.entities.CategoryEntity;
@@ -29,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -177,6 +179,23 @@ public class PostServiceImpl implements PostService {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<BlogAppResponse> fetchAllPostMedia(int userId, int postId) {
+        Instant startTime = Instant.now();
+        List<ImageMetaDto> imageMeta = new ArrayList<>();
+        UserEntity user = this.userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "User id", userId));
+        UserPostEntity post = this.postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "Post id", postId));
+        if (Objects.equals(user.getId(), post.getUser().getId())) {
+            List<ImageEntity> images = this.imageRepository.findByPost(post);
+            imageMeta = this.mapImageEntityToImageDto.apply(images);
+        }
+        BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
+                .meta(ResponseMeta.builder().status(HttpStatus.OK.value()).build()).data(imageMeta).build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     /// //////////////////////////////////////////////
     /// // PRIVATE METHODS || HELPER METHODS
     /// //////////////////////////////////////////////
@@ -188,6 +207,9 @@ public class PostServiceImpl implements PostService {
             .builder().currentPageNumber(pageMeta.getNumber()).currentPageSize(pageMeta.getSize())
             .totalElements(pageMeta.getTotalElements()).totalPages(pageMeta.getTotalPages() - 1)
             .lastPage(pageMeta.isLast()).build();
+
+    Function<List<ImageEntity>, List<ImageMetaDto>> mapImageEntityToImageDto = imageEntities -> imageEntities.stream()
+            .map(image -> this.modelMapper.map(image, ImageMetaDto.class)).toList();
 
     private List<ImageEntity> populateImageEntity(List<MultipartFile> postImages, UserPostEntity post) {
         return postImages.stream().map(imageData -> {

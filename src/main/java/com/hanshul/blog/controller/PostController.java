@@ -43,10 +43,10 @@ public class PostController {
     /////// METHODS
     /////////////////////////////////////////////////
 
-    @PostMapping(value = "/users/{userId}/category/{categoryId}/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/user/{userId}/category/{categoryId}/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<BlogAppResponse> createPost(@PathVariable("userId") Integer userId,
             @PathVariable("categoryId") Integer categoryId, @Valid @RequestPart CreatePostRequestModel requestBody,
-            @Valid @Size(max = 5) @RequestPart(required = false ) List<MultipartFile> files) {
+            @Valid @Size(max = 5) @RequestPart(required = false) List<MultipartFile> files) {
         return this.postService.createPost(requestBody, userId, categoryId, files);
     }
 
@@ -75,8 +75,14 @@ public class PostController {
     }
 
     @GetMapping("/post/search")
-    public ResponseEntity<BlogAppResponse> searchPostByKeyword(@RequestParam(value = "title") String title) {
+    public ResponseEntity<BlogAppResponse> searchPostByKeyword(@RequestParam(value = "postTitle") String title) {
         return this.postService.searchPostByKeyword(title);
+    }
+
+    @GetMapping("/user/{userId}/post/{postId}/media")
+    public ResponseEntity<BlogAppResponse> fetchAllPostMedia(@PathVariable(value = "userId") int userId,
+            @PathVariable(value = "postId") int postId) {
+        return this.postService.fetchAllPostMedia(userId, postId);
     }
 
     @DeleteMapping("/post/{postId}")

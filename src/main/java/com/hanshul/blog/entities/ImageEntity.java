@@ -27,7 +27,7 @@ public class ImageEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     @Lob
-    @Column(name = "image_data",columnDefinition = "MEDIUMBLOB")
+    @Column(name = "image_data", columnDefinition = "MEDIUMBLOB")
     private byte[] image;
     @Column(name = "file_name")
     private String fileName;

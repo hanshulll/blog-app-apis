@@ -17,4 +17,5 @@ public interface PostService {
     ResponseEntity<BlogAppResponse> getPostByCategory(Integer categoryId);
     ResponseEntity<BlogAppResponse> getPostByUser(Integer userId);
     ResponseEntity<BlogAppResponse> searchPostByKeyword(String keyword);
+    ResponseEntity<BlogAppResponse> fetchAllPostMedia(int userId, int postId);
 }
