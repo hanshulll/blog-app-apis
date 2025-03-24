@@ -26,7 +26,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableWebSecurity
 @EnableWebMvc
 @EnableMethodSecurity
-public class SecurityConfig  {
+public class SecurityConfig {
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -39,36 +39,34 @@ public class SecurityConfig  {
 
     @Bean
     public AuthenticationProvider authProvider() {
-        DaoAuthenticationProvider provider=new DaoAuthenticationProvider();
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(new BCryptPasswordEncoder(12));
         return provider;
-//        provider.setPasswordEncoder(new PasswordEncoder() {
-//            @Override
-//            public String encode(CharSequence rawPassword) {
-//                System.out.println("raw password : " +rawPassword);
-//                return rawPassword.toString();
-//            }
-//
-//            @Override
-//            public boolean matches(CharSequence rawPassword, String encodedPassword) {
-//                System.out.println("raw password : " +rawPassword + " encoded password : "+ encodedPassword);
-//                return rawPassword.toString().equalsIgnoreCase(encodedPassword);
-//            }
-//        });
+        // provider.setPasswordEncoder(new PasswordEncoder() {
+        // @Override
+        // public String encode(CharSequence rawPassword) {
+        // System.out.println("raw password : " +rawPassword);
+        // return rawPassword.toString();
+        // }
+        //
+        // @Override
+        // public boolean matches(CharSequence rawPassword, String encodedPassword) {
+        // System.out.println("raw password : " +rawPassword + " encoded password : "+
+        // encodedPassword);
+        // return rawPassword.toString().equalsIgnoreCase(encodedPassword);
+        // }
+        // });
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers(HttpMethod.GET,"/**").permitAll()
-                        .requestMatchers(Constant.PUBLIC_URL).permitAll()
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.GET, "/**").permitAll()
+                        .requestMatchers(Constant.PUBLIC_URL).permitAll().anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -76,7 +74,8 @@ public class SecurityConfig  {
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        AuthenticationManagerBuilder authenticationManagerBuilder = http
+                .getSharedObject(AuthenticationManagerBuilder.class);
         return authenticationManagerBuilder.build();
     }
 }

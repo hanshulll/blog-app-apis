@@ -21,11 +21,12 @@ import java.util.function.Function;
 @Component
 public class JwtTokenHelper {
 
-//    private static final String SECRET = "TmV3U2VjcmV0S2V5Rm9ySldUU2lnbmluZ1B1cnBvc2VzMTIzNDU2Nzg=\r\n";
+    // private static final String SECRET =
+    // "TmV3U2VjcmV0S2V5Rm9ySldUU2lnbmluZ1B1cnBvc2VzMTIzNDU2Nzg=\r\n";
 
     private String secretKey;
 
-    public JwtTokenHelper(){
+    public JwtTokenHelper() {
         secretKey = generateSecretKey();
     }
 
@@ -33,7 +34,7 @@ public class JwtTokenHelper {
         try {
             KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
             SecretKey secretKey = keyGen.generateKey();
-//            System.out.println("Secret Key : " + secretKey.toString());
+            // System.out.println("Secret Key : " + secretKey.toString());
             return Base64.getEncoder().encodeToString(secretKey.getEncoded());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Error generating secret key", e);
@@ -44,11 +45,8 @@ public class JwtTokenHelper {
 
         Map<String, Object> claims = new HashMap<>();
 
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*30))
+        return Jwts.builder().setClaims(claims).setSubject(username).setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
                 .signWith(getKey(), SignatureAlgorithm.HS256).compact();
 
     }
@@ -69,11 +67,8 @@ public class JwtTokenHelper {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getKey())
-                .build().parseClaimsJws(token).getBody();
+        return Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).getBody();
     }
-
 
     public boolean validateToken(String token, UserDetails userDetails) {
         final String userName = extractUserName(token);

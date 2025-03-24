@@ -43,7 +43,7 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CommentEntity> comments;
     @Builder.Default
-    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "user_role_relations", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<RoleEntity> roles = new HashSet<>();
 }

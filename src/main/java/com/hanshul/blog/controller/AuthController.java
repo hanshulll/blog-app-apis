@@ -32,7 +32,8 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
     private UserService userService;
 
-    public AuthController(JwtTokenHelper jwtTokenHelper, MyUserDetailsService userDetailsService, AuthenticationManager authenticationManager, UserService userService) {
+    public AuthController(JwtTokenHelper jwtTokenHelper, MyUserDetailsService userDetailsService,
+            AuthenticationManager authenticationManager, UserService userService) {
         this.jwtTokenHelper = jwtTokenHelper;
         this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
@@ -43,12 +44,12 @@ public class AuthController {
     @Operation(summary = "API to authenticate user and generate JWT token", description = "This api receives user info authenticate it and returns JWT token on successful authentication")
     public ResponseEntity<BlogAppResponse> createToken(@RequestBody JwtAuthRequest request) {
         Instant startTime = Instant.now();
-        this.authenticate(request.getEmail(),request.getPassword());
+        this.authenticate(request.getEmail(), request.getPassword());
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(request.getEmail());
         String token = this.jwtTokenHelper.generateToken(userDetails.getUsername());
-        BlogAppResponse response = BlogAppResponse.builder().success(true)
-                .starTime(startTime).meta(ResponseMeta.builder().status(200).build()).data(new JwtResponseDto(token)).build();
-        return new ResponseEntity<>(response,HttpStatus.OK);
+        BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
+                .meta(ResponseMeta.builder().status(200).build()).data(new JwtResponseDto(token)).build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/register")
@@ -57,7 +58,8 @@ public class AuthController {
     }
 
     private void authenticate(String email, String password) {
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email,password);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email,
+                password);
         this.authenticationManager.authenticate(authenticationToken);
     }
 }

@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
     /////// CONSTRUCTOR
     /////////////////////////////////////////////////
 
-    public UserServiceImpl(ModelMapper modelMapper, UserRepository userRepository,RoleRepository roleRepository) {
+    public UserServiceImpl(ModelMapper modelMapper, UserRepository userRepository, RoleRepository roleRepository) {
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<BlogAppResponse> registerUser(UserDetailRequestModel requestModel) {
         Instant startTime = Instant.now();
         UserEntity userEntity = this.modelMapper.map(requestModel, UserEntity.class);
-        Optional<RoleEntity> role  = this.roleRepository.findById(102);
+        Optional<RoleEntity> role = this.roleRepository.findById(102);
         userEntity.setPassword(encoder.encode(userEntity.getPassword()));
         userEntity.getRoles().add(role.get());
         UserEntity createdUserDetails = this.userRepository.save(userEntity);

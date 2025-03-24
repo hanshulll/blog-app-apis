@@ -14,17 +14,15 @@ public class MyUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository repo;
 
-
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        UserEntity user= this.repo.findByEmail(email);
+        UserEntity user = this.repo.findByEmail(email);
 
-        if (user==null) {
+        if (user == null) {
             throw new UsernameNotFoundException("User 404");
         }
         return new UserPrincipal(user);
     }
 
 }
-
