@@ -2,10 +2,8 @@ package com.hanshul.blog.controller;
 
 import com.hanshul.blog.dto.JwtResponseDto;
 import com.hanshul.blog.payloads.JwtAuthRequest;
-import com.hanshul.blog.payloads.UserDetailRequestModel;
 import com.hanshul.blog.security.JwtTokenHelper;
 import com.hanshul.blog.security.MyUserDetailsService;
-import com.hanshul.blog.service.UserService;
 import com.hanshul.blog.utility.BlogAppResponse;
 import com.hanshul.blog.utility.ResponseMeta;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,14 +28,12 @@ public class AuthController {
     private JwtTokenHelper jwtTokenHelper;
     private MyUserDetailsService userDetailsService;
     private AuthenticationManager authenticationManager;
-    private UserService userService;
 
     public AuthController(JwtTokenHelper jwtTokenHelper, MyUserDetailsService userDetailsService,
-            AuthenticationManager authenticationManager, UserService userService) {
+            AuthenticationManager authenticationManager) {
         this.jwtTokenHelper = jwtTokenHelper;
         this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
-        this.userService = userService;
     }
 
     @PostMapping("/login")
@@ -50,11 +46,6 @@ public class AuthController {
         BlogAppResponse response = BlogAppResponse.builder().success(true).starTime(startTime)
                 .meta(ResponseMeta.builder().status(200).build()).data(new JwtResponseDto(token)).build();
         return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<BlogAppResponse> registerUser(@RequestBody UserDetailRequestModel request) {
-        return this.userService.registerUser(request);
     }
 
     private void authenticate(String email, String password) {

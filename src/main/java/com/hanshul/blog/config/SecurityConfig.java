@@ -6,7 +6,6 @@ import com.hanshul.blog.utility.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -43,28 +42,14 @@ public class SecurityConfig {
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(new BCryptPasswordEncoder(12));
         return provider;
-        // provider.setPasswordEncoder(new PasswordEncoder() {
-        // @Override
-        // public String encode(CharSequence rawPassword) {
-        // System.out.println("raw password : " +rawPassword);
-        // return rawPassword.toString();
-        // }
-        //
-        // @Override
-        // public boolean matches(CharSequence rawPassword, String encodedPassword) {
-        // System.out.println("raw password : " +rawPassword + " encoded password : "+
-        // encodedPassword);
-        // return rawPassword.toString().equalsIgnoreCase(encodedPassword);
-        // }
-        // });
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.GET, "/**").permitAll()
-                        .requestMatchers(Constant.PUBLIC_URL).permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(request -> request.requestMatchers(Constant.PUBLIC_URL).permitAll().anyRequest()
+                        .authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
