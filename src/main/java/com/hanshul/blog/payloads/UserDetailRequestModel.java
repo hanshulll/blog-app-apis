@@ -1,6 +1,5 @@
 package com.hanshul.blog.payloads;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -15,7 +14,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDetailRequestModel {
     @NotEmpty
     @Size(min = 3, message = "username must be minimum of 3 characters")

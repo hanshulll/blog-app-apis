@@ -30,5 +30,5 @@ public class CategoryEntity {
     private String categoryDescription;
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     // @JsonManagedReference
-    private List<UserPostEntity> post;
+    private List<PostEntity> post;
 }
