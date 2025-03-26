@@ -61,7 +61,7 @@ public class CategoryController {
 
     @GetMapping("/{categoryId}/get")
     @Operation(summary = "API to get category by categoryId", description = "This api fetches category details by categoryId")
-    public ResponseEntity<BlogAppResponse> getCategoryById(@PathVariable("userId") Integer userId) {
+    public ResponseEntity<BlogAppResponse> getCategoryById(@PathVariable("categoryId") Integer userId) {
         return this.categoryService.getCategoryById(userId);
     }
 
