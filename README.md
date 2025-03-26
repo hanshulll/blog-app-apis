@@ -77,7 +77,7 @@ http://localhost:9090/swagger-ui/index.html
 Contributions are welcome! Feel free to fork the repo and submit a pull request.
 
 ## 📩 Contact
-For queries, reach out on **LinkedIn**: [Your Profile](https://linkedin.com/in/yourprofile)
+For queries, reach out on **LinkedIn**: [LinkedIn](https://www.linkedin.com/in/hanshul-chandel/)
 
 ---
 
