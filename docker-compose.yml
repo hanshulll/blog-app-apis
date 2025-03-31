@@ -1,0 +1,45 @@
+services:
+  app:
+    container_name: "blog-sphere"
+    build:
+      context: .
+    image: hanshulll/blog-sphere
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+         - "9090:9090"
+    networks:
+      - blogsphere-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/blogsphere
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+  mysql:
+      container_name: "my-sql"
+      image: mysql:latest
+      environment:
+        MYSQL_HOST: mysql
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: blogsphere
+      ports:
+        - "3306:3306"
+      networks:
+        - blogsphere-app
+      volumes:
+        - mysql-db:/var/lib/mysql
+        - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      healthcheck: # This ensures MySQL is ready before the app starts
+        test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uuser", "-puserpassword" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+
+networks:
+  blogsphere-app:
+    driver: bridge
+
+volumes:
+  mysql-db:
