@@ -1,8 +1,6 @@
 services:
   app:
     container_name: "blog-sphere"
-    build:
-      context: .
     image: hanshulll/blog-sphere
     depends_on:
       mysql:
