@@ -30,7 +30,7 @@ services:
         - mysql-db:/var/lib/mysql
         - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       healthcheck: # This ensures MySQL is ready before the app starts
-        test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uuser", "-puserpassword" ]
+        test: [ "CMD", "mysqladmin", "ping", "-h", "mysql", "-uroot", "-proot" ]
         interval: 10s
         timeout: 5s
         retries: 5
